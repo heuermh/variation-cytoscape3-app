@@ -39,6 +39,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.bdgenomics.adam</groupId>
+      <artifactId>adam-format</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.dishevelled</groupId>
       <artifactId>dsh-vocabulary</artifactId>
       <scope>compile</scope>
