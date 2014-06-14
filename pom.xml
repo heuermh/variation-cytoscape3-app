@@ -16,7 +16,7 @@
   <url>http://github.com/heuermh/variation-cytoscape3-app</url>
   <inceptionYear>2013</inceptionYear>
 
-  <!-- WARNING:  Do not attempt to release with this pom.xml, only release from SVN -->
+  <!-- WARNING:  Do not attempt to release to Maven Central with this pom.xml, only release from SVN -->
 
   <developers>
     <developer>
