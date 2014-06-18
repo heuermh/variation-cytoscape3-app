@@ -120,8 +120,8 @@ public final class AdamVariationServiceTest
         ADAMContig contig = new ADAMContig();
         contig.setContigName("22");
         contig.setContigLength(1L);
-        //contig.setAssembly(reference);  // todo (mlh): method not available in version 0.11.0, added in 0.11.1-SNAPSHOT
-        //contig.setSpecies(species);  // same
+        contig.setAssembly(reference);
+        contig.setSpecies(species);
 
         variant.setContig(contig);
         variant.setPosition(16162219L);  // todo (mlh): confirm; ADAMVariant coordinate system is zero-based, closed-open range
