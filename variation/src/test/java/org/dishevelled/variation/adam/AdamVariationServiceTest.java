@@ -27,12 +27,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
+
+import java.net.URL;
+
+import com.google.common.io.Files;
+
+import org.apache.commons.io.FileUtils;
+
 import org.bdgenomics.adam.avro.ADAMContig;
 import org.bdgenomics.adam.avro.ADAMVariant;
 
 import org.dishevelled.variation.Feature;
 import org.dishevelled.variation.Variation;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,6 +54,8 @@ public final class AdamVariationServiceTest
 {
     private String species;
     private String reference;
+    private File file;
+    private String filePath;
     private ADAMVariant variant;
     private AdamVariationService variationService;
 
@@ -52,22 +64,35 @@ public final class AdamVariationServiceTest
     {
         species = "human";
         reference = "GRCh37";
+        file = Files.createTempDir();
+        filePath = file.getPath();
         variant = new ADAMVariant();
-
-        // todo:  determine what additional constructor parameters will be necessary
-        variationService = new AdamVariationService(species, reference);
+        variationService = new AdamVariationService(species, reference, filePath);
     }
+
+    @After
+    public void tearDown() throws Exception
+    {
+        file.delete();
+    }
+
 
     @Test(expected=NullPointerException.class)
     public void testConstructorNullSpecies()
     {
-        new AdamVariationService(null, reference);
+        new AdamVariationService(null, reference, filePath);
     }
 
     @Test(expected=NullPointerException.class)
     public void testConstructorNullReference()
     {
-        new AdamVariationService(species, null);
+        new AdamVariationService(species, null, filePath);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void testConstructorNullFilePath()
+    {
+        new AdamVariationService(species, reference, null);
     }
 
     @Test
@@ -141,20 +166,17 @@ public final class AdamVariationServiceTest
     }
 
 
-    // todo:  determine how to let AdamVariationService know where the .adam directory is
+    // todo:  implement reading from parquet directory such that this passes
 
-    @Ignore
+    @Test
     public void testVariations() throws Exception
     {
-        // todo:  the .adam file is a directory, so this copy-resource-to-tmp-file mechanism won't work
-        //Files.write(Resources.toByteArray(getClass().getResource("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp-trim.vcf.adam")), file);
+        copyResources("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp-trim.vcf.adam");
 
         Feature feature = new Feature(species, reference, "ENSG00000206195", "22", 16147979, 16193004, -1);
         boolean found = false;
         for (Variation variation : variationService.variations(feature))
         {
-            // should this variation be included?
-            // the samples in the test file show only ref allele at this position
             if (variation.getIdentifiers().contains("rs139448371"))
             {
                 assertEquals(species, variation.getSpecies());
@@ -170,5 +192,40 @@ public final class AdamVariationServiceTest
             }
         }
         assertTrue(found);
+    }
+
+
+    // internal test utility code
+
+    private void copyResources(final String resourceName) throws Exception {
+        URL resourceUrl = getClass().getResource(resourceName);
+        File resourceFile = FileUtils.toFile(resourceUrl);
+        FileUtils.copyDirectory(resourceFile, file);
+    }
+
+    @Test
+    public void testCopyResources() throws Exception {
+        copyResources("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp-trim.adam");
+
+        assertNotNull(file);
+
+        File parquetFile = new File(file, "part-r-00000.gz.parquet");
+        assertTrue(parquetFile.exists());
+
+        File parquetCrcFile = new File(file, ".part-r-00000.gz.parquet.crc");
+        assertTrue(parquetCrcFile.exists());
+
+        File metadataFile = new File(file, "_metadata");
+        assertTrue(metadataFile.exists());
+
+        File metadataCrcFile = new File(file, "._metadata.crc");
+        // todo (mlh):  hope this isn't a problem
+        //assertTrue(metadataCrcFile.exists());
+
+        File successFile = new File(file, "_SUCCESS");
+        assertTrue(successFile.exists());
+
+        File successCrcFile = new File(file, "._SUCCESS.crc");
+        //assertTrue(successCrcFile.exists());
     }
 }
