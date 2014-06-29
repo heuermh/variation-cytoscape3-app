@@ -37,7 +37,7 @@ import org.dishevelled.variation.Feature;
 import org.dishevelled.variation.Variation;
 import org.dishevelled.variation.VariationService;
 
-import org.apache.spark.SparkContext // add to Maven buld 
+//import org.apache.spark.SparkContext // add to Maven buld
 
 /**
  * ADAM file variation service.
@@ -49,7 +49,7 @@ public final class AdamVariationService implements VariationService
     private String reference;
     private File file;
     private String filePath;
-    private ADAMVariant variant;
+    private AdamVariant variant;
 
     public AdamVariationService(final String species, final String reference, final File file, final String filePath, AdamVariant variant)
     {
@@ -57,7 +57,7 @@ public final class AdamVariationService implements VariationService
 	    checkNotNull(reference);
 	    checkNotNull(file);
 	    checkNotNull(filePath);
-	    checkNotNul(variant);
+	    checkNotNull(variant);
 	    
 	    this.species = species;
 	    this.reference = reference;
@@ -78,13 +78,13 @@ public final class AdamVariationService implements VariationService
         try
         {
             // Implementation 1
-            ADAMReader.stream(Files.newReaderSupplier); // to-do
+            //AdamReader.stream(Files.newReaderSupplier); // to-do
             
             
             
             
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             // todo
         }
@@ -93,18 +93,21 @@ public final class AdamVariationService implements VariationService
     
     public AdamVariant ConvertNullADAMVariant()
     {
-    	
+        AdamVariant variant = null;
+        return variant;
     }
     
     public AdamVariant convertEmptyAdamVariant()
     {
+        AdamVariant variant = null;
+        return variant;
     	
     }
     
-    public convertADAMVariant()
+    public Variation convertAdamVariant() // return type correct?
     {
-        ADAMContig contig = new ADAMContig();
-
+        AdamContig contig = null; // fix constructor parameters.
+        return null;
     }
 
     public Variation convert(AdamVariant variant)
@@ -114,12 +117,12 @@ public final class AdamVariationService implements VariationService
        // use Adam Parser from Matt  
        // todo -- use AdamContig and AdamVariant to create a Variation
 
-        Variation variationtoReturn = new Variation;
+        Variation variationtoReturn = null;
 
-        String species = variant.getSpecies();
-        String reference = variant.getReference();
+        String species = variant.getContig().getSpecies();
+        String reference = variant.getContig().getAssembly(); // in AdamContig, there is a mis-match between getter methond name and field value
         List<String> identifiers; // TO-DO
-        String referenceAllele = variant.getReferenceAllele;
+        String referenceAllele = variant.getReferenceAllele();
         List<String> alternateAlleles; // TO-DO
         String region;
         String start;
@@ -136,13 +139,16 @@ public final class AdamVariationService implements VariationService
         private final int start;
         private final int end;
         */
+
+        return variationtoReturn;
     }
     
     
     
     public AdamContig convertMissingContig()
     {
-    	
+        AdamContig contig = null; // fix constructor parameters.
+        return null;
 
     }
     

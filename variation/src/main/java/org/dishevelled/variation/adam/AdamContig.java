@@ -1,3 +1,5 @@
+package org.dishevelled.variation.adam;
+
 /*
 
     dsh-variation  Variation.
@@ -23,38 +25,39 @@
 */
 
 public class AdamContig{
-	private String name;
-	private long  contigLength;
-	private String reference;
-	private String species;
-	
+    private String name;
+    private long  contigLength;
+    private String reference;
+    private String species;
 
-	public ADAMContig(String name, long contigLength, String reference, String species)
-	{
-		this.name = name;
-		this.contigLength = contigLength;
-		this.reference = reference;
-		this.species = species;
-	}
 
-	public String getContigName()
-	{
-		return name;
-	}
+    public AdamContig(String name, long contigLength, String reference, String species)
+    {
+        this.name = name;
+        this.contigLength = contigLength;
+        this.reference = reference;
+        this.species = species;
+    }
 
-	public long getContigLength()
-	{
-		return length;
-	}
+    public String getContigName()
+    {
+        return name;
+    }
 
-	public String getAssembly()
-	{
-		return reference;
-	}
+    public long getContigLength()
+    {
+        return contigLength;
+    }
 
-	public String getSpecies()
-	{
-		return species;
-	}
+    public String getAssembly()
+    {
+        return reference;
+    }
+
+    public String getSpecies()
+    {
+        return species;
+    }
 
 }
+

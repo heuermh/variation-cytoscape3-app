@@ -1,3 +1,5 @@
+package org.dishevelled.variation.adam;
+
 /*
 
     dsh-variation  Variation.
@@ -23,45 +25,46 @@
 */
 
 public class AdamVariant{
-  	private AdamContig contig;
-  	private String position;
-  	private String exclusiveEnd;
-  	private String referenceAllele;
-  	private String variantAllele;
+    private AdamContig contig;
+    private String position;
+    private String exclusiveEnd;
+    private String referenceAllele;
+    private String variantAllele;
 
-  	public ADAMVariant(AdamContig contig, String position, String exclusiveEnd, String referenceAllele, String variantAllele)
-  	{
-  		this.contig = contig;
-  		this.position = position;
-  		this.exclusiveEnd = exclusiveEnd;
-  		this.referenceAllele = referenceAllele;
-  		this.variantAllele = variantAllele;
-  
-  	}
-  
-  	public void getContig()
-  	{
-  		return contig;
-  	}
-  	
-  	public void getPosition()
-  	{
-  		return position;
-  	}
-  
-  	public void getExclusiveEnd()
-  	{
-  		return exclusiveEnd;
-  	}
-  
-  	public void getReferenceAllele()
-  	{
-  		return referenceAllele;
-  	}
-  
-  	public void getVariantAllele()
-  	{
-  		return variantAllele;
-  	}
+    public AdamVariant(AdamContig contig, String position, String exclusiveEnd, String referenceAllele, String variantAllele)
+    {
+        this.contig = contig;
+        this.position = position;
+        this.exclusiveEnd = exclusiveEnd;
+        this.referenceAllele = referenceAllele;
+        this.variantAllele = variantAllele;
+
+    }
+
+    public AdamContig getContig()
+    {
+        return contig;
+    }
+
+    public String getPosition()
+    {
+        return position;
+    }
+
+    public String getExclusiveEnd()
+    {
+        return exclusiveEnd;
+    }
+
+    public String getReferenceAllele()
+    {
+        return referenceAllele;
+    }
+
+    public String getVariantAllele()
+    {
+        return variantAllele;
+    }
 
 }
+
