@@ -110,36 +110,28 @@ public final class AdamVariationService implements VariationService
         return null;
     }
 
-    public Variation convert(AdamVariant variant)
+    public Variation convert(List<AdamVariant> variants)
     {
-    	
-    	
-       // use Adam Parser from Matt  
+        // use Adam Parser from Matt
        // todo -- use AdamContig and AdamVariant to create a Variation
+        List<String> listOfVariantAlleles = new ArrayList<String>();
+        for(AdamVariant v:variants){
+            String varAllele =v.getVariantAllele();
+            listOfVariantAlleles.add(varAllele);
+        }
 
         Variation variationtoReturn = null;
 
         String species = variant.getContig().getSpecies();
         String reference = variant.getContig().getAssembly(); // in AdamContig, there is a mis-match between getter methond name and field value
-        List<String> identifiers; // TO-DO
+        List<String> identifiers = null; // TO-DO
         String referenceAllele = variant.getReferenceAllele();
-        List<String> alternateAlleles; // TO-DO
-        String region;
-        String start;
-        String end;    
-      
-        
-        /*
-        private final String species;
-        private final String reference;
-        private final List<String> identifiers; // e.g. dbSNP id
-        private final String referenceAllele;
-        private final List<String> alternateAlleles;
-        private final String region;
-        private final int start;
-        private final int end;
-        */
+        List<String> alternateAlleles = listOfVariantAlleles; // TO-DO
+        String region = variant.getContig().getContigName();
+        long start = variant.getPosition();
+        long end = variant.getExclusiveEnd();
 
+        variationtoReturn = new Variation(species, reference, identifiers, referenceAllele, alternateAlleles, region, start, end);
         return variationtoReturn;
     }
     
