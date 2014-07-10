@@ -36,8 +36,8 @@ import com.google.common.io.Files;
 
 import org.apache.commons.io.FileUtils;
 
-import org.bdgenomics.adam.avro.ADAMContig;
-import org.bdgenomics.adam.avro.ADAMVariant;
+import org.bdgenomics.formats.avro.Contig;
+import org.bdgenomics.formats.avro.Variant;
 
 import org.dishevelled.variation.Feature;
 import org.dishevelled.variation.Variation;
@@ -56,7 +56,7 @@ public final class AdamVariationServiceTest
     private String reference;
     private File file;
     private String filePath;
-    private ADAMVariant variant;
+    private Variant variant;
     private AdamVariationService variationService;
 
     @Before
@@ -66,7 +66,7 @@ public final class AdamVariationServiceTest
         reference = "GRCh37";
         file = Files.createTempDir();
         filePath = file.getAbsolutePath();
-        variant = new ADAMVariant();
+        variant = new Variant();
         variationService = new AdamVariationService(species, reference, filePath);
     }
 
@@ -127,10 +127,10 @@ public final class AdamVariationServiceTest
     @Test(expected=IOException.class)
     public void testConvertMissingContig() throws Exception
     {
-        variant.setPosition(16162219L);
-        variant.setExclusiveEnd(16162219L + 1L);
+        variant.setStart(16162219L);
+        variant.setEnd(16162219L + 1L);
         variant.setReferenceAllele("C");
-        variant.setVariantAllele("A");
+        variant.setAlternateAllele("A");
 
         variationService.convert(variant);
     }
@@ -141,7 +141,7 @@ public final class AdamVariationServiceTest
     @Test
     public void testConvertADAMVariant() throws Exception
     {
-        ADAMContig contig = new ADAMContig();
+        Contig contig = new Contig();
         contig.setContigName("22");
         contig.setContigLength(1L);
         contig.setAssembly(reference);
@@ -149,10 +149,10 @@ public final class AdamVariationServiceTest
 
         variant.setContig(contig);
         /* in avro/parquet file "position": 16162218, "exclusiveEnd": 16162219, */
-        variant.setPosition(16162218L);
-        variant.setExclusiveEnd(16162219L);
+        variant.setStart(16162218L);
+        variant.setEnd(16162219L);
         variant.setReferenceAllele("C");
-        variant.setVariantAllele("A");
+        variant.setAlternateAllele("A");
 
         Variation variation = variationService.convert(variant);
         assertEquals(species, variation.getSpecies());
@@ -162,7 +162,7 @@ public final class AdamVariationServiceTest
         assertEquals("A", variation.getAlternateAlleles().get(0));
         assertEquals("22", variation.getRegion());
         assertEquals(16162219, variation.getStart());
-        assertEquals(16162220, variation.getEnd());
+        assertEquals(16162219, variation.getEnd());
     }
 
 
@@ -189,8 +189,9 @@ public final class AdamVariationServiceTest
                 assertEquals(1, variation.getAlternateAlleles().size());
                 assertEquals("A", variation.getAlternateAlleles().get(0));
                 assertEquals("22", variation.getRegion());
+                // variation is 1-based, closed interval
                 assertEquals(16162219, variation.getStart());
-                assertEquals(16162220, variation.getEnd());
+                assertEquals(16162219, variation.getEnd());
 
                 found = true;
             }

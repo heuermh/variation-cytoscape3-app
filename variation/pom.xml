@@ -83,8 +83,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.bdgenomics.adam</groupId>
-      <artifactId>adam-format</artifactId>
+      <groupId>org.bdgenomics.bdg-formats</groupId>
+      <artifactId>bdg-formats</artifactId>
       <scope>compile</scope>
     </dependency>
     <dependency>
