@@ -65,7 +65,7 @@ public final class AdamVariationServiceTest
         species = "human";
         reference = "GRCh37";
         file = Files.createTempDir();
-        filePath = file.getPath();
+        filePath = file.getAbsolutePath();
         variant = new ADAMVariant();
         variationService = new AdamVariationService(species, reference, filePath);
     }
@@ -111,22 +111,21 @@ public final class AdamVariationServiceTest
     // todo:  add a package-private method that converts ADAMVariant to Variation, assume the ADAMVariant already overlaps a Feature
 
     @Test(expected=NullPointerException.class)
-    public void testConvertNullADAMVariant()
+    public void testConvertNullADAMVariant() throws Exception
     {
         variationService.convert(null);
     }
 
-
     // todo:  what should happen if the ADAMVariant is missing data?
 
-    @Test
-    public void testConvertEmptyADAMVariant()
+    @Test(expected=IOException.class)
+    public void testConvertEmptyADAMVariant() throws Exception
     {
         variationService.convert(variant);
     }
 
-    @Test
-    public void testConvertMissingContig()
+    @Test(expected=IOException.class)
+    public void testConvertMissingContig() throws Exception
     {
         variant.setPosition(16162219L);
         variant.setExclusiveEnd(16162219L + 1L);
@@ -140,7 +139,7 @@ public final class AdamVariationServiceTest
     // todo:  implement convert method such that this passes
 
     @Test
-    public void testConvertADAMVariant()
+    public void testConvertADAMVariant() throws Exception
     {
         ADAMContig contig = new ADAMContig();
         contig.setContigName("22");
@@ -149,8 +148,9 @@ public final class AdamVariationServiceTest
         contig.setSpecies(species);
 
         variant.setContig(contig);
-        variant.setPosition(16162219L);  // todo (mlh): confirm; ADAMVariant coordinate system is zero-based, closed-open range
-        variant.setExclusiveEnd(16162219L + 1L);
+        /* in avro/parquet file "position": 16162218, "exclusiveEnd": 16162219, */
+        variant.setPosition(16162218L);
+        variant.setExclusiveEnd(16162219L);
         variant.setReferenceAllele("C");
         variant.setVariantAllele("A");
 
@@ -161,8 +161,8 @@ public final class AdamVariationServiceTest
         assertEquals(1, variation.getAlternateAlleles().size());
         assertEquals("A", variation.getAlternateAlleles().get(0));
         assertEquals("22", variation.getRegion());
-        assertEquals(16162219 - 1, variation.getStart());
-        assertEquals(16162219, variation.getEnd());
+        assertEquals(16162219, variation.getStart());
+        assertEquals(16162220, variation.getEnd());
     }
 
 
@@ -171,22 +171,26 @@ public final class AdamVariationServiceTest
     @Test
     public void testVariations() throws Exception
     {
-        copyResources("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp-trim.vcf.adam");
+        copyResources("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp-trim.adam");
 
         Feature feature = new Feature(species, reference, "ENSG00000206195", "22", 16147979, 16193004, -1);
         boolean found = false;
         for (Variation variation : variationService.variations(feature))
         {
-            if (variation.getIdentifiers().contains("rs139448371"))
+            System.out.println("variation " + variation);
+            if (variation.getRegion().equals("22") && variation.getStart() == 16162219)
+            // ADAMVariant doesn't include dbSnp ids
+            //if (variation.getIdentifiers().contains("rs139448371"))
             {
-                assertEquals(species, variation.getSpecies());
-                assertEquals(reference, variation.getReference());
+                // vcf2Adam doesn't populate species and assembly on ADAMContig
+                //assertEquals(species, variation.getSpecies());
+                //assertEquals(reference, variation.getReference());
                 assertEquals("C", variation.getReferenceAllele());
                 assertEquals(1, variation.getAlternateAlleles().size());
                 assertEquals("A", variation.getAlternateAlleles().get(0));
                 assertEquals("22", variation.getRegion());
-                assertEquals(16162219 - 1, variation.getStart());
-                assertEquals(16162219, variation.getEnd());
+                assertEquals(16162219, variation.getStart());
+                assertEquals(16162220, variation.getEnd());
 
                 found = true;
             }
@@ -218,14 +222,7 @@ public final class AdamVariationServiceTest
         File metadataFile = new File(file, "_metadata");
         assertTrue(metadataFile.exists());
 
-        File metadataCrcFile = new File(file, "._metadata.crc");
-        // todo (mlh):  hope this isn't a problem
-        //assertTrue(metadataCrcFile.exists());
-
         File successFile = new File(file, "_SUCCESS");
         assertTrue(successFile.exists());
-
-        File successCrcFile = new File(file, "._SUCCESS.crc");
-        //assertTrue(successCrcFile.exists());
     }
 }
