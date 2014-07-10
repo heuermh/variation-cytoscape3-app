@@ -161,7 +161,7 @@
       <dependency>
         <groupId>com.github.heuermh.ensemblrestclient</groupId>
         <artifactId>ensembl-rest-client</artifactId>
-        <version>1.4</version>
+        <version>1.5</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
@@ -213,6 +213,11 @@
         <artifactId>service-api</artifactId>
         <type>test-jar</type>
         <version>${cytoscape.api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.dishevelled</groupId>
+        <artifactId>dsh-compress</artifactId>
+        <version>1.0</version>
       </dependency>
       <dependency>
         <groupId>org.dishevelled</groupId>
