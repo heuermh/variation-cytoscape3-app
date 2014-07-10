@@ -26,12 +26,17 @@ package org.dishevelled.variation.ensembl;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import static org.dishevelled.variation.ensembl.EnsemblRestClientUtils.retryIfNecessary;
+import static org.dishevelled.variation.ensembl.EnsemblRestClientUtils.throttle;
+
 import com.github.heuermh.ensemblrestclient.EnsemblRestClientException;
 import com.github.heuermh.ensemblrestclient.Lookup;
 import com.github.heuermh.ensemblrestclient.LookupService;
 
 import org.dishevelled.variation.Feature;
 import org.dishevelled.variation.FeatureService;
+
+import org.dishevelled.variation.ensembl.EnsemblRestClientUtils.Remote;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,9 +92,17 @@ public final class EnsemblRestClientFeatureService
         checkArgument(this.species.equals(species));
         checkArgument(this.reference.equals(reference));
 
+        throttle();
         try
         {
-            Lookup lookup = lookupService.lookup(this.species, identifier);
+            Lookup lookup = retryIfNecessary(new Remote<Lookup>()
+                {
+                    @Override
+                    public Lookup remote() throws EnsemblRestClientException
+                    {
+                        return lookupService.lookup(species, identifier);
+                    }
+                });
             if (lookup == null)
             {
                 if (logger.isWarnEnabled())
