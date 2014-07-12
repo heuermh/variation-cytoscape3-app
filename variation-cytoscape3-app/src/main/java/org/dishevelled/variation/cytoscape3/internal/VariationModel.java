@@ -106,6 +106,9 @@ final class VariationModel
     /** List of variation consequences. */
     private final EventList<VariationConsequence> variationConsequences;
 
+    /** List of column names for the current network. */
+    private final EventList<String> columnNames;
+
     /** Map of features keyed by node. */
     private final ListMultimap<CyNode, Feature> nodesToFeatures;
 
@@ -154,6 +157,7 @@ final class VariationModel
         features = GlazedLists.eventList(new ArrayList<Feature>());
         variations = GlazedLists.eventList(new ArrayList<Variation>());
         variationConsequences = GlazedLists.eventList(new ArrayList<VariationConsequence>());
+        columnNames = GlazedLists.eventList(new ArrayList<String>());
         featuresToNodes = ArrayListMultimap.create();
         nodesToFeatures = ArrayListMultimap.create();
         featuresToRanges = HashBiMap.create();
@@ -454,6 +458,28 @@ final class VariationModel
     EventList<VariationConsequence> variationConsequences()
     {
         return variationConsequences;
+    }
+
+    /**
+     * Refresh columns.
+     */
+    void refreshColumns()
+    {
+        columnNames.clear();
+        if (this.network != null)
+        {
+            columnNames.addAll(VariationUtils.columnNames(this.network));
+        }
+    }
+
+    /**
+     * Return the list of column names for the current network.
+     *
+     * @return the list of column names for the current network
+     */
+    EventList<String> columnNames()
+    {
+        return columnNames;
     }
 
     // indexes

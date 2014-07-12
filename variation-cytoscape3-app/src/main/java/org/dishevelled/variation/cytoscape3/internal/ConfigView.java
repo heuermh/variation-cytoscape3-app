@@ -54,6 +54,8 @@ import javax.swing.JPanel;
 
 import javax.swing.border.EmptyBorder;
 
+import ca.odell.glazedlists.swing.DefaultEventComboBoxModel;
+
 import com.github.heuermh.ensemblrestclient.EnsemblRestClientFactory;
 
 import org.dishevelled.layout.LabelFieldPanel;
@@ -93,9 +95,8 @@ final class ConfigView
     /** Reference. */
     private final JTextField reference;
 
-    /** Ensembl gene id column. */
-    // todo: should be a combo box containing all the column names from the current node table
-    private final JTextField ensemblGeneIdColumn;
+    /** Column names. */
+    private final JComboBox columnNames;
 
     /** Ensembl REST server URL. */
     private final JTextField ensemblRestServerUrl;
@@ -134,13 +135,27 @@ final class ConfigView
             }
         };
 
+    /** Refresh columns action. */
+    private final AbstractAction refreshColumns = new AbstractAction("Refresh columns")
+        {
+            @Override
+            public void actionPerformed(final ActionEvent event)
+            {
+                refreshColumns();
+            }
+        };
+
     /** Property change listener. */
     private final PropertyChangeListener propertyChangeListener = new PropertyChangeListener()
         {
             @Override
             public void propertyChange(final PropertyChangeEvent event)
             {
-                if ("species".equals(event.getPropertyName()))
+                if ("network".equals(event.getPropertyName()))
+                {
+                    refreshColumns();
+                }
+                else if ("species".equals(event.getPropertyName()))
                 {
                     species.setText((String) event.getNewValue());
                 }
@@ -150,7 +165,7 @@ final class ConfigView
                 }
                 else if ("ensemblGeneIdColumn".equals(event.getPropertyName()))
                 {
-                    ensemblGeneIdColumn.setText((String) event.getNewValue());
+                    columnNames.setSelectedItem(event.getNewValue());
                 }
                 else if ("canonical".equals(event.getPropertyName()))
                 {
@@ -203,23 +218,17 @@ final class ConfigView
             }
         };
 
-    /** Ensembl gene id column action listener. */
-    private final ActionListener ensemblGeneIdColumnActionListener = new ActionListener()
+    /** Column names action listener. */
+    private final ActionListener columnNamesActionListener = new ActionListener()
         {
             @Override
             public void actionPerformed(final ActionEvent event)
             {
-                model.setEnsemblGeneIdColumn(ensemblGeneIdColumn.getText());
-            }
-        };
-
-    /** Ensembl gene id column focus listener. */
-    private final FocusListener ensemblGeneIdColumnFocusListener = new FocusAdapter()
-        {
-            @Override
-            public void focusLost(final FocusEvent event)
-            {
-                model.setEnsemblGeneIdColumn(ensemblGeneIdColumn.getText());
+                if (columnNames.getSelectedItem() != null)
+                {
+                    model.setEnsemblGeneIdColumn((String) columnNames.getSelectedItem());
+                }
+                apply.setEnabled(true);
             }
         };
 
@@ -321,10 +330,8 @@ final class ConfigView
         reference.addActionListener(referenceActionListener);
         reference.addFocusListener(referenceFocusListener);
 
-        ensemblGeneIdColumn = new JTextField(32);
-        ensemblGeneIdColumn.setText(model.getEnsemblGeneIdColumn());
-        ensemblGeneIdColumn.addActionListener(ensemblGeneIdColumnActionListener);
-        ensemblGeneIdColumn.addFocusListener(ensemblGeneIdColumnFocusListener);
+        columnNames = new JComboBox(new DefaultEventComboBoxModel<String>(model.columnNames()));
+        columnNames.addActionListener(columnNamesActionListener);
 
         ensemblRestServerUrl = new JTextField(32);
         ensemblRestServerUrl.setText("http://beta.rest.ensembl.org/");
@@ -379,7 +386,7 @@ final class ConfigView
         panel.setOpaque(false);
         panel.addField("Species:", wrap(species));
         panel.addField("Reference:", wrap(reference));
-        panel.addField("Ensembl gene id column:", wrap(ensemblGeneIdColumn));
+        panel.addField("Ensembl gene id column:", createEnsemblGeneIdColumnPanel());
         panel.addSpacing(12);
         panel.addField("Ensembl REST service URL:", wrap(ensemblRestServerUrl));
         panel.addField("GEMINI database name:", createGeminiDatabaseNamePanel());
@@ -420,6 +427,25 @@ final class ConfigView
         panel.addField(" ", somatic);
         panel.addFinalSpacing();
         return panel;
+    }
+
+    /**
+     * Create and return a new Ensembl gene id panel.
+     *
+     * @return a new Ensembl gene id panel
+     */
+    private JPanel createEnsemblGeneIdColumnPanel()
+    {
+        JPanel panel = new JPanel();
+        panel.setOpaque(false);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        panel.add(columnNames);
+        panel.add(Box.createHorizontalStrut(12));
+        panel.add(new JButton(refreshColumns));
+        panel.add(Box.createGlue());
+        panel.add(Box.createGlue());
+        return panel;
+
     }
 
     /**
@@ -509,6 +535,23 @@ final class ConfigView
         panel.add(Box.createGlue());
         panel.add(Box.createGlue());
         return panel;
+    }
+
+    /**
+     * Refresh columns.
+     */
+    private void refreshColumns()
+    {
+        model.refreshColumns();
+
+        if (model.columnNames().contains(model.getEnsemblGeneIdColumn()))
+        {
+            columnNames.setSelectedItem(model.getEnsemblGeneIdColumn());
+        }
+        else
+        {
+            columnNames.setSelectedIndex(0);
+        }
     }
 
     /**
