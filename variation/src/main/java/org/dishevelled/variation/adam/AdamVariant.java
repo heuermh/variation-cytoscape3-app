@@ -31,6 +31,7 @@ public class AdamVariant{
     private String referenceAllele;
     private String variantAllele;
 
+
     public AdamVariant(AdamContig contig, long position, long exclusiveEnd, String referenceAllele, String variantAllele)
     {
         this.contig = contig;
@@ -65,6 +66,27 @@ public class AdamVariant{
     {
         return variantAllele;
     }
+
+    public void setContig(AdamContig contig){
+        this.contig = contig;
+    }
+
+    public void setPosition(long position){
+
+    }
+
+    public void setExclusiveEnd(long exclusiveEnd){
+
+    }
+
+    public void setReferenceAllele(String referenceAllele){
+
+    }
+
+    public void setVariantAllele(String variantAllele){
+
+    }
+
 
 }
 

@@ -32,15 +32,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import org.dishevelled.variation.Feature;
 import org.dishevelled.variation.Variation;
 import org.dishevelled.variation.VariationService;
 
-//import org.apache.spark.SparkContext // add to Maven buld
+import parquet.avro.AvroParquetReader;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.fs.Path;
+
+//import org.apache.spark.SparkContext // add to Maven build
 
 /**
  * ADAM file variation service.
+ *
+ * @author  Niranjan Padmanabhan
  */
 
 public final class AdamVariationService implements VariationService
@@ -66,29 +71,44 @@ public final class AdamVariationService implements VariationService
 	    this.variant = variant;
 	}
 
+    // reads ADAMVariants from directory of Parquet-formatted files, converts them to Variations using the convert method, and returns a list of Variations.
     @Override
     public List<Variation> variations(final Feature feature)
     {
-        checkNotNull(feature);
+        /*checkNotNull(feature);
         checkArgument(species.equals(feature.getSpecies()));
-        checkArgument(reference.equals(feature.getReference()));
+        checkArgument(reference.equals(feature.getReference()));*/
 
-        
-        final List<Variation> variations = new ArrayList<Variation>(); // ArrayList of Variation to be returned 
+        final List<Variation> variationsToReturn = new ArrayList<Variation>(); // ArrayList of Variation to be returned
+        List<AdamVariant> adamList = new ArrayList<AdamVariant>();
         try
         {
-            // Implementation 1
-            //AdamReader.stream(Files.newReaderSupplier); // to-do
-            
-            
-            
-            
+            Path dataFilePath = new Path(filePath);
+            AvroParquetReader<Genotype> parquetReader =  new AvroParquetReader<Genotype>(dataFilePath);
+
+            Genotype tmpValue;
+
+            while ((tmpValue = parquetReader.read()) != null)
+            {
+                AdamContig contig = tmpValue.variant.contig;
+                long pos = tmpValue.variant.start;
+                long exclusiveEnd = tmpValue.variant.end;
+                String referenceAllele = tmpValue.variant.referenceAllele;
+                String variantAllele = tmpValue.variant.alternateAllele;
+
+                AdamVariant variant = new AdamVariant(contig, pos, exclusiveEnd, referenceAllele, variantAllele);
+                adamList.add(variant);
+                Variation v = convert(adamList);
+                variationsToReturn.add(v);
+                // what to do when multiple AdamVariants are present?
+            }
+            return variationsToReturn;
         }
         catch (Exception e)
         {
-            // todo
+            e.printStackTrace();
         }
-        return variations;
+        return variationsToReturn;
     }
     
     public AdamVariant ConvertNullADAMVariant()
@@ -101,7 +121,6 @@ public final class AdamVariationService implements VariationService
     {
         AdamVariant variant = null;
         return variant;
-    	
     }
     
     public Variation convertAdamVariant() // return type correct?
@@ -112,8 +131,7 @@ public final class AdamVariationService implements VariationService
 
     public Variation convert(List<AdamVariant> variants)
     {
-        // use Adam Parser from Matt
-       // todo -- use AdamContig and AdamVariant to create a Variation
+        // todo -- use AdamContig and AdamVariant to create a Variation
         List<String> listOfVariantAlleles = new ArrayList<String>();
         for(AdamVariant v:variants){
             String varAllele =v.getVariantAllele();
@@ -134,15 +152,11 @@ public final class AdamVariationService implements VariationService
         variationtoReturn = new Variation(species, reference, identifiers, referenceAllele, alternateAlleles, region, start, end);
         return variationtoReturn;
     }
-    
-    
-    
+
     public AdamContig convertMissingContig()
     {
         AdamContig contig = null; // fix constructor parameters.
         return null;
 
     }
-    
-   
 }

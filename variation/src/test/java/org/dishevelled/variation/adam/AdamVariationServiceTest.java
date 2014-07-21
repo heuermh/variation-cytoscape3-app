@@ -56,7 +56,7 @@ public final class AdamVariationServiceTest
     private String reference;
     private File file;
     private String filePath;
-    private ADAMVariant variant;
+    private AdamVariant variant;
     private AdamVariationService variationService;
 
     @Before
@@ -66,8 +66,8 @@ public final class AdamVariationServiceTest
         reference = "GRCh37";
         file = Files.createTempDir();
         filePath = file.getPath();
-        variant = new ADAMVariant();
-        variationService = new AdamVariationService(species, reference, filePath);
+        variant = new AdamVariant();
+        variationService = new AdamVariationService(species, reference, file, filePath, variant);
     }
 
     @After
@@ -80,19 +80,31 @@ public final class AdamVariationServiceTest
     @Test(expected=NullPointerException.class)
     public void testConstructorNullSpecies()
     {
-        new AdamVariationService(null, reference, filePath);
+        new AdamVariationService(null, reference, file, filePath, variant);
     }
 
     @Test(expected=NullPointerException.class)
     public void testConstructorNullReference()
     {
-        new AdamVariationService(species, null, filePath);
+        new AdamVariationService(species, null, file, filePath, variant);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void testConstructorNullFile()
+    {
+        new AdamVariationService(species, reference, null, filePath, variant);
     }
 
     @Test(expected=NullPointerException.class)
     public void testConstructorNullFilePath()
     {
-        new AdamVariationService(species, reference, null);
+        new AdamVariationService(species, reference, file, null, variant);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void testConstructorNullVariant()
+    {
+        new AdamVariationService(species, reference, file, filePath, null);
     }
 
     @Test
@@ -142,7 +154,7 @@ public final class AdamVariationServiceTest
     @Test
     public void testConvertADAMVariant()
     {
-        ADAMContig contig = new ADAMContig();
+        AdamContig contig = new AdamContig();
         contig.setContigName("22");
         contig.setContigLength(1L);
         contig.setAssembly(reference);

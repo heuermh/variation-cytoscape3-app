@@ -59,5 +59,22 @@ public class AdamContig{
         return species;
     }
 
+    public void setContigLength(long contigLength){
+        this.contigLength = contigLength;
+    }
+
+    public void setContigName(String name){
+        this.name = name;
+    }
+
+    public void setAssembly(String reference){
+        this.reference = reference;
+    }
+
+    public void setSpecies(String species){
+        this.species = species;
+    }
+
+
 }
 
