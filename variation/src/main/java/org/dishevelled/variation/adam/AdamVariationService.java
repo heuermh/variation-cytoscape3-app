@@ -1,5 +1,6 @@
-/*
+package org.dishevelled.variation.adam;
 
+/*
     dsh-variation  Variation.
     Copyright (c) 2013-2014 held jointly by the individual authors.
 
@@ -21,7 +22,6 @@
     > http://www.opensource.org/licenses/lgpl-license.php
 
 */
-package org.dishevelled.variation.adam;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -37,7 +37,7 @@ import org.dishevelled.variation.Variation;
 import org.dishevelled.variation.VariationService;
 
 import parquet.avro.AvroParquetReader;
-import org.apache.avro.generic.GenericRecord;
+import org.apache.avro;
 import org.apache.hadoop.fs.Path;
 
 //import org.apache.spark.SparkContext // add to Maven build
@@ -56,7 +56,11 @@ public final class AdamVariationService implements VariationService
     private String filePath;
     private AdamVariant variant;
 
-    public AdamVariationService(final String species, final String reference, final File file, final String filePath, AdamVariant variant)
+    public AdamVariationService(final String species,
+                                final String reference,
+                                final File file,
+                                final String filePath,
+                                AdamVariant variant)
     {
 	    checkNotNull(species);
 	    checkNotNull(reference);
@@ -75,18 +79,18 @@ public final class AdamVariationService implements VariationService
     @Override
     public List<Variation> variations(final Feature feature)
     {
-        /*checkNotNull(feature);
+        checkNotNull(feature);
         checkArgument(species.equals(feature.getSpecies()));
-        checkArgument(reference.equals(feature.getReference()));*/
+        checkArgument(reference.equals(feature.getReference()));
 
         final List<Variation> variationsToReturn = new ArrayList<Variation>(); // ArrayList of Variation to be returned
         List<AdamVariant> adamList = new ArrayList<AdamVariant>();
         try
         {
             Path dataFilePath = new Path(filePath);
-            AvroParquetReader<Genotype> parquetReader =  new AvroParquetReader<Genotype>(dataFilePath);
+            AvroParquetReader<ADAMGenotype> parquetReader =  new AvroParquetReader<ADAMGenotype>(dataFilePath);
 
-            Genotype tmpValue;
+            ADAMGenotype tmpValue;
 
             while ((tmpValue = parquetReader.read()) != null)
             {
@@ -104,7 +108,7 @@ public final class AdamVariationService implements VariationService
             }
             return variationsToReturn;
         }
-        catch (Exception e)
+        catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -126,7 +130,7 @@ public final class AdamVariationService implements VariationService
     public Variation convertAdamVariant() // return type correct?
     {
         AdamContig contig = null; // fix constructor parameters.
-        return null;
+        return;
     }
 
     public Variation convert(List<AdamVariant> variants)
@@ -157,6 +161,5 @@ public final class AdamVariationService implements VariationService
     {
         AdamContig contig = null; // fix constructor parameters.
         return null;
-
     }
 }

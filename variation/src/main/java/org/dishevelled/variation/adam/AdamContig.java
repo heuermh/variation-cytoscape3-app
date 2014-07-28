@@ -24,12 +24,12 @@ package org.dishevelled.variation.adam;
 
 */
 
-public class AdamContig{
+public class AdamContig
+{
     private String name;
     private long  contigLength;
     private String reference;
     private String species;
-
 
     public AdamContig(String name, long contigLength, String reference, String species)
     {
@@ -59,22 +59,23 @@ public class AdamContig{
         return species;
     }
 
-    public void setContigLength(long contigLength){
+    public void setContigLength(long contigLength)
+    {
         this.contigLength = contigLength;
     }
 
-    public void setContigName(String name){
+    public void setContigName(String name)
+    {
         this.name = name;
     }
 
-    public void setAssembly(String reference){
+    public void setAssembly(String reference)
+    {
         this.reference = reference;
     }
 
-    public void setSpecies(String species){
+    public void setSpecies(String species)
+    {
         this.species = species;
     }
-
-
 }
-
