@@ -31,6 +31,11 @@ public class AdamContig
     private String reference;
     private String species;
 
+    public AdamContig()
+    {
+
+    }
+
     public AdamContig(String name, long contigLength, String reference, String species)
     {
         this.name = name;

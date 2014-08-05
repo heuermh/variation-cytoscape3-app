@@ -31,6 +31,8 @@ import java.io.File;
 import java.io.IOException;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.common.io.Files;
 
@@ -165,8 +167,10 @@ public final class AdamVariationServiceTest
         variant.setExclusiveEnd(16162219L + 1L);
         variant.setReferenceAllele("C");
         variant.setVariantAllele("A");
+        List<AdamVariant> variants = new ArrayList<AdamVariant>();
+        variants.add(variant);
 
-        Variation variation = variationService.convert(variant);
+        Variation variation = variationService.convert(variants);
         assertEquals(species, variation.getSpecies());
         assertEquals(reference, variation.getReference());
         assertEquals("C", variation.getReferenceAllele());
@@ -205,8 +209,6 @@ public final class AdamVariationServiceTest
         }
         assertTrue(found);
     }
-
-
     // internal test utility code
 
     private void copyResources(final String resourceName) throws Exception {
