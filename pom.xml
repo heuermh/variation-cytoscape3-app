@@ -151,7 +151,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>15.0</version>
+        <version>17.0</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject</groupId>
@@ -161,7 +161,7 @@
       <dependency>
         <groupId>com.github.heuermh.ensemblrestclient</groupId>
         <artifactId>ensembl-rest-client</artifactId>
-        <version>1.5</version>
+        <version>1.5.1</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
@@ -181,7 +181,7 @@
       <dependency>
         <groupId>org.bdgenomics.bdg-formats</groupId>
         <artifactId>bdg-formats</artifactId>
-        <version>0.1.2-SNAPSHOT</version>
+        <version>0.2.0</version>
       </dependency>
       <dependency>
         <groupId>org.cytoscape</groupId>
