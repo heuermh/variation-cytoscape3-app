@@ -24,20 +24,20 @@ package org.dishevelled.variation.adam;
 
 */
 
-public class AdamVariant
+public class Variant
 {
-    private AdamContig contig;
+    private Contig contig;
     private long position;
     private long exclusiveEnd;
     private String referenceAllele;
     private String variantAllele;
 
-    public AdamVariant()
+    public Variant()
     {
 
     }
 
-    public AdamVariant(AdamContig contig, long position, long exclusiveEnd, String referenceAllele, String variantAllele)
+    public Variant(Contig contig, long position, long exclusiveEnd, String referenceAllele, String variantAllele)
     {
         this.contig = contig;
         this.position = position;
@@ -46,7 +46,7 @@ public class AdamVariant
         this.variantAllele = variantAllele;
     }
 
-    public AdamContig getContig()
+    public Contig getContig()
     {
         return contig;
     }
@@ -71,7 +71,7 @@ public class AdamVariant
         return variantAllele;
     }
 
-    public void setContig(AdamContig contig)
+    public void setContig(Contig contig)
     {
         this.contig = contig;
     }

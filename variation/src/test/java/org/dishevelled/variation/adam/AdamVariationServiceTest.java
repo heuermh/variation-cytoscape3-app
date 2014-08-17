@@ -31,15 +31,13 @@ import java.io.File;
 import java.io.IOException;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.google.common.io.Files;
 
 import org.apache.commons.io.FileUtils;
 
-import org.bdgenomics.adam.avro.ADAMContig;
-import org.bdgenomics.adam.avro.ADAMVariant;
+import org.bdgenomics.formats.avro.Contig;
+import org.bdgenomics.formats.avro.Variant;
 
 import org.dishevelled.variation.Feature;
 import org.dishevelled.variation.Variation;
@@ -58,7 +56,7 @@ public final class AdamVariationServiceTest
     private String reference;
     private File file;
     private String filePath;
-    private AdamVariant variant;
+    private Variant variant;
     private AdamVariationService variationService;
 
     @Before
@@ -67,9 +65,9 @@ public final class AdamVariationServiceTest
         species = "human";
         reference = "GRCh37";
         file = Files.createTempDir();
-        filePath = file.getPath();
-        variant = new AdamVariant();
-        variationService = new AdamVariationService(species, reference, file, filePath, variant);
+        filePath = file.getAbsolutePath();
+        variant = new Variant();
+        variationService = new AdamVariationService(species, reference, filePath);
     }
 
     @After
@@ -82,31 +80,19 @@ public final class AdamVariationServiceTest
     @Test(expected=NullPointerException.class)
     public void testConstructorNullSpecies()
     {
-        new AdamVariationService(null, reference, file, filePath, variant);
+        new AdamVariationService(null, reference, filePath);
     }
 
     @Test(expected=NullPointerException.class)
     public void testConstructorNullReference()
     {
-        new AdamVariationService(species, null, file, filePath, variant);
-    }
-
-    @Test(expected=NullPointerException.class)
-    public void testConstructorNullFile()
-    {
-        new AdamVariationService(species, reference, null, filePath, variant);
+        new AdamVariationService(species, null, filePath);
     }
 
     @Test(expected=NullPointerException.class)
     public void testConstructorNullFilePath()
     {
-        new AdamVariationService(species, reference, file, null, variant);
-    }
-
-    @Test(expected=NullPointerException.class)
-    public void testConstructorNullVariant()
-    {
-        new AdamVariationService(species, reference, file, filePath, null);
+        new AdamVariationService(species, reference, null);
     }
 
     @Test
@@ -125,90 +111,93 @@ public final class AdamVariationServiceTest
     // todo:  add a package-private method that converts ADAMVariant to Variation, assume the ADAMVariant already overlaps a Feature
 
     @Test(expected=NullPointerException.class)
-    public void testConvertNullADAMVariant()
+    public void testConvertNullADAMVariant() throws Exception
     {
         variationService.convert(null);
     }
 
-
     // todo:  what should happen if the ADAMVariant is missing data?
 
-    /*@Test
-    public void testConvertEmptyADAMVariant()
+    @Test(expected=IOException.class)
+    public void testConvertEmptyADAMVariant() throws Exception
     {
         variationService.convert(variant);
-    }*/
-
-    @Test
-    public void testConvertMissingContig()
-    {
-        variant.setPosition(16162219L);
-        variant.setExclusiveEnd(16162219L + 1L);
-        variant.setReferenceAllele("C");
-        variant.setVariantAllele("A");
-        // revisit following statement
-        // variationService.convert(variant);
     }
 
+    @Test(expected=IOException.class)
+    public void testConvertMissingContig() throws Exception
+    {
+        variant.setStart(16162219L);
+        variant.setEnd(16162219L + 1L);
+        variant.setReferenceAllele("C");
+        variant.setAlternateAllele("A");
+
+        variationService.convert(variant);
+    }
 
     // todo:  implement convert method such that this passes
 
     @Test
-    public void testConvertADAMVariant()
+    public void testConvertADAMVariant() throws Exception
     {
-        AdamContig contig = new AdamContig();
+        Contig contig = new Contig();
         contig.setContigName("22");
         contig.setContigLength(1L);
         contig.setAssembly(reference);
         contig.setSpecies(species);
 
         variant.setContig(contig);
-        variant.setPosition(16162219L);  // todo (mlh): confirm; ADAMVariant coordinate system is zero-based, closed-open range
-        variant.setExclusiveEnd(16162219L + 1L);
+        /* in avro/parquet file "start": 16162218, "end": 16162219, */
+        variant.setStart(16162218L);
+        variant.setEnd(16162219L);
         variant.setReferenceAllele("C");
-        variant.setVariantAllele("A");
-        List<AdamVariant> variants = new ArrayList<AdamVariant>();
-        variants.add(variant);
+        variant.setAlternateAllele("A");
 
-        Variation variation = variationService.convert(variants);
+        Variation variation = variationService.convert(variant);
         assertEquals(species, variation.getSpecies());
         assertEquals(reference, variation.getReference());
         assertEquals("C", variation.getReferenceAllele());
         assertEquals(1, variation.getAlternateAlleles().size());
         assertEquals("A", variation.getAlternateAlleles().get(0));
         assertEquals("22", variation.getRegion());
-        assertEquals(16162219 - 1, variation.getStart());
+        assertEquals(16162219, variation.getStart());
         assertEquals(16162219, variation.getEnd());
     }
-
 
     // todo:  implement reading from parquet directory such that this passes
 
     @Test
     public void testVariations() throws Exception
     {
-        copyResources("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp-trim.vcf.adam");
+        //copyResources("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp-trim.adam");
+        copyResources("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp.vcf.adam");
 
         Feature feature = new Feature(species, reference, "ENSG00000206195", "22", 16147979, 16193004, -1);
-        boolean found = false;
+        int count = 0;
         for (Variation variation : variationService.variations(feature))
         {
-            if (variation.getIdentifiers().contains("rs139448371"))
+            if (variation.getRegion().equals("22") && variation.getStart() == 16162219)
+            // todo: ADAM variant doesn't include dbSnp ids
+            //if (variation.getIdentifiers().contains("rs139448371"))
             {
-                assertEquals(species, variation.getSpecies());
-                assertEquals(reference, variation.getReference());
+                // todo: vcf2Adam doesn't populate species and assembly on ADAMContig
+                //assertEquals(species, variation.getSpecies());
+                //assertEquals(reference, variation.getReference());
                 assertEquals("C", variation.getReferenceAllele());
                 assertEquals(1, variation.getAlternateAlleles().size());
                 assertEquals("A", variation.getAlternateAlleles().get(0));
                 assertEquals("22", variation.getRegion());
-                assertEquals(16162219 - 1, variation.getStart());
+                // variation is 1-based, closed interval
+                assertEquals(16162219, variation.getStart());
                 assertEquals(16162219, variation.getEnd());
 
-                found = true;
+                count++;
             }
         }
-        assertTrue(found);
+        assertEquals(1, count);
     }
+
+
     // internal test utility code
 
     private void copyResources(final String resourceName) throws Exception {
@@ -219,7 +208,8 @@ public final class AdamVariationServiceTest
 
     @Test
     public void testCopyResources() throws Exception {
-        copyResources("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp-trim.adam");
+        //copyResources("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp-trim.adam");
+        copyResources("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp.vcf.adam");
 
         assertNotNull(file);
 
@@ -232,14 +222,7 @@ public final class AdamVariationServiceTest
         File metadataFile = new File(file, "_metadata");
         assertTrue(metadataFile.exists());
 
-        File metadataCrcFile = new File(file, "._metadata.crc");
-        // todo (mlh):  hope this isn't a problem
-        //assertTrue(metadataCrcFile.exists());
-
         File successFile = new File(file, "_SUCCESS");
         assertTrue(successFile.exists());
-
-        File successCrcFile = new File(file, "._SUCCESS.crc");
-        //assertTrue(successCrcFile.exists());
     }
 }

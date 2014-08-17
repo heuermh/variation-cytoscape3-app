@@ -1,6 +1,5 @@
-package org.dishevelled.variation.adam;
-
 /*
+
     dsh-variation  Variation.
     Copyright (c) 2013-2014 held jointly by the individual authors.
 
@@ -22,6 +21,7 @@ package org.dishevelled.variation.adam;
     > http://www.opensource.org/licenses/lgpl-license.php
 
 */
+package org.dishevelled.variation.adam;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -30,52 +30,105 @@ import java.io.File;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+
+import com.google.common.io.Files;
+
+import org.apache.commons.io.FileUtils;
+
+import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+
+import org.apache.hadoop.fs.Path;
+
+import org.bdgenomics.formats.avro.Genotype;
+import org.bdgenomics.formats.avro.Variant;
 
 import org.dishevelled.variation.Feature;
 import org.dishevelled.variation.Variation;
 import org.dishevelled.variation.VariationService;
 
-import parquet.avro.AvroParquetReader;
-import org.apache.avro;
-import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-//import org.apache.spark.SparkContext // add to Maven build
+import parquet.avro.AvroParquetReader;
 
 /**
- * ADAM file variation service.
- *
- * @author  Niranjan Padmanabhan
+ * Implementation of variation service APIs via ADAM.
  */
-
 public final class AdamVariationService implements VariationService
 {
-	private String species;
-    private String reference;
-    private File file;
-    private String filePath;
-    private AdamVariant variant;
+    /** Species. */
+    private final String species;
 
-    public AdamVariationService(final String species,
-                                final String reference,
-                                final File file,
-                                final String filePath,
-                                AdamVariant variant)
+    /** Reference. */
+    private final String reference;
+
+    /** ADAM parquet file or directory of files. */
+    private final String filePath;
+
+    /** Parquet <code>.part</code> file paths. */
+    private final List<Path> paths;
+
+    /** Logger. */
+    private final Logger logger = LoggerFactory.getLogger(AdamVariationService.class);
+
+
+    /**
+     * Create a new ADAM variation service.
+     *
+     * @param species species, must not be null
+     * @param reference reference, must not be null
+     * @param file ADAM parquet file or directory of files, must not be null
+     */
+    public AdamVariationService(final String species, final String reference, final String filePath)
     {
-	    checkNotNull(species);
-	    checkNotNull(reference);
-	    checkNotNull(file);
-	    checkNotNull(filePath);
-	    checkNotNull(variant);
-	    
-	    this.species = species;
-	    this.reference = reference;
-	    this.file = file;
-	    this.filePath = filePath;
-	    this.variant = variant;
-	}
+        checkNotNull(species);
+        checkNotNull(reference);
+        checkNotNull(filePath);
 
-    // reads ADAMVariants from directory of Parquet-formatted files, converts them to Variations using the convert method, and returns a list of Variations.
+        this.species = species;
+        this.reference = reference;
+        this.filePath = filePath;
+
+        paths = new ArrayList<Path>();
+        File root = new File(filePath);
+        //logger.info("root " + root + " exists " + root.exists() + " is directory " + root.isDirectory());
+
+        paths.add(new Path(new File(root, "part-r-00000.gz.parquet").toURI()));
+
+
+        for (File file : FileUtils.listFiles(root, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE))
+        {
+            logger.info("found file " + file);
+            if (file.getName().contains("part"))
+            {
+                logger.info("found part file " + file);
+                paths.add(new Path(file.toURI()));
+            }
+        }
+        for (File file : FileUtils.listFiles(root, new WildcardFileFilter("*part*"), TrueFileFilter.INSTANCE))
+        {
+            logger.info("found part file " + file);
+            paths.add(new Path(file.toURI()));
+        }
+        for (File file : Files.fileTreeTraverser().children(root))
+        {
+            logger.info("found file " + file);
+            if (file.getName().contains("part"))
+            {
+                logger.info("found part file " + file);
+                paths.add(new Path(file.toURI()));
+            }
+        }
+    }
+
     @Override
     public List<Variation> variations(final Feature feature)
     {
@@ -83,83 +136,81 @@ public final class AdamVariationService implements VariationService
         checkArgument(species.equals(feature.getSpecies()));
         checkArgument(reference.equals(feature.getReference()));
 
-        final List<Variation> variationsToReturn = new ArrayList<Variation>(); // ArrayList of Variation to be returned
-        List<AdamVariant> adamList = new ArrayList<AdamVariant>();
+        // adam genotypes denormalize genotype --> variant relationship, must find unique variants
+        final Set<Variation> variations = new HashSet<Variation>();
         try
         {
-            Path dataFilePath = new Path(filePath);
-            AvroParquetReader<ADAMGenotype> parquetReader =  new AvroParquetReader<ADAMGenotype>(dataFilePath);
-
-            ADAMGenotype tmpValue;
-
-            while ((tmpValue = parquetReader.read()) != null)
+            //logger.info("paths = " + paths);
+            for (Path path : paths)
             {
-                AdamContig contig = tmpValue.variant.contig;
-                long pos = tmpValue.variant.start;
-                long exclusiveEnd = tmpValue.variant.end;
-                String referenceAllele = tmpValue.variant.referenceAllele;
-                String variantAllele = tmpValue.variant.alternateAllele;
-
-                AdamVariant variant = new AdamVariant(contig, pos, exclusiveEnd, referenceAllele, variantAllele);
-                adamList.add(variant);
-                Variation v = convert(adamList);
-                variationsToReturn.add(v);
-                // what to do when multiple AdamVariants are present?
+                AvroParquetReader<Genotype> parquetReader = new AvroParquetReader<Genotype>(path);
+                while (true)
+                {
+                    Genotype genotype = parquetReader.read();
+                    //logger.info("genotype = " + genotype);
+                    if (genotype == null)
+                    {
+                        break;
+                    }
+                    //logger.info("variant = " + genotype.getVariant());
+                    variations.add(convert(genotype.getVariant()));
+                }
+                parquetReader.close();
             }
-            return variationsToReturn;
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            if (logger.isWarnEnabled())
+            {
+                logger.warn("unable to find variations for region {}:{}-{}:{} for species {}, caught {}", feature.getRegion(), feature.getStart(), feature.getEnd(), feature.getStrand(), species, e.getMessage());
+            }
         }
-        return variationsToReturn;
-    }
-    
-    public AdamVariant ConvertNullADAMVariant()
-    {
-        AdamVariant variant = null;
-        return variant;
-    }
-    
-    public AdamVariant convertEmptyAdamVariant()
-    {
-        AdamVariant variant = null;
-        return variant;
-    }
-    
-    public Variation convertAdamVariant() // return type correct?
-    {
-        AdamContig contig = null; // fix constructor parameters.
-        return;
+        return ImmutableList.copyOf(variations);
     }
 
-    public Variation convert(List<AdamVariant> variants)
+
+    /**
+     * Convert the specified ADAM variant to a variation.
+     *
+     * @param variant variant to convert, must not be null
+     * @return the specified ADAM variant converted to a variation
+     * @throws IOException if an I/O error occurs
+     */
+    Variation convert(Variant variant) throws IOException
     {
-        // todo -- use AdamContig and AdamVariant to create a Variation
-        List<String> listOfVariantAlleles = new ArrayList<String>();
-        for(AdamVariant v:variants){
-            String varAllele =v.getVariantAllele();
-            listOfVariantAlleles.add(varAllele);
+        checkNotNull(variant);
+        if (variant.getContig() == null)
+        {
+            throw new IOException("could not convert ADAM variant, contig must not be null");
         }
-
-        Variation variationtoReturn = null;
-
-        String species = variant.getContig().getSpecies();
-        String reference = variant.getContig().getAssembly(); // in AdamContig, there is a mis-match between getter methond name and field value
-        List<String> identifiers = null; // TO-DO
-        String referenceAllele = variant.getReferenceAllele();
-        List<String> alternateAlleles = listOfVariantAlleles; // TO-DO
-        String region = variant.getContig().getContigName();
-        long start = variant.getPosition();
-        long end = variant.getExclusiveEnd();
-
-        variationtoReturn = new Variation(species, reference, identifiers, referenceAllele, alternateAlleles, region, start, end);
-        return variationtoReturn;
+        String species = toString(variant.getContig().getSpecies());
+        String reference = toString(variant.getContig().getAssembly());
+        List<String> identifiers = Collections.emptyList();
+        String ref = toString(variant.getReferenceAllele());
+        List<String> alt = ImmutableList.of(toString(variant.getAlternateAllele()));
+        String region = toString(variant.getContig().getContigName());
+        // ADAM is 0-based, closed-open interval
+        long start = variant.getStart() + 1L;
+        long end = variant.getEnd();
+        return new Variation(species, reference, identifiers, ref, alt, region, start, end);
     }
 
-    public AdamContig convertMissingContig()
+    static String toString(final CharSequence charSequence)
     {
-        AdamContig contig = null; // fix constructor parameters.
-        return null;
+        return charSequence == null ? "null" : charSequence.toString();
+    }
+
+    static List<String> toStringList(final List<CharSequence> charSequences)
+    {
+        if (charSequences == null || charSequences.isEmpty())
+        {
+            return Collections.emptyList();
+        }
+        List<String> strings = Lists.newArrayListWithExpectedSize(charSequences.size());
+        for (CharSequence charSequence : charSequences)
+        {
+            strings.add(charSequence.toString());
+        }
+        return ImmutableList.copyOf(strings);
     }
 }

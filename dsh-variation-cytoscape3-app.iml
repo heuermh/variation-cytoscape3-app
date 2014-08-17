@@ -41,6 +41,7 @@
     <orderEntry type="library" name="Maven: org.apache.xmlgraphics:batik-transcoder:1.7" level="project" />
     <orderEntry type="library" name="Maven: org.apache.xmlgraphics:fop:0.94" level="project" />
     <orderEntry type="library" name="Maven: org.apache.xmlgraphics:xmlgraphics-commons:1.2" level="project" />
+    <orderEntry type="library" name="Maven: commons-io:commons-io:2.4" level="project" />
     <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.0.4" level="project" />
     <orderEntry type="library" name="Maven: org.apache.avalon.framework:avalon-framework-api:4.3.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.avalon.framework:avalon-framework-impl:4.3.1" level="project" />
@@ -68,8 +69,39 @@
     <orderEntry type="library" name="Maven: org.dishevelled:dsh-layout:1.0" level="project" />
     <orderEntry type="module" module-name="dsh-variation" />
     <orderEntry type="library" name="Maven: com.google.code.findbugs:jsr305:2.0.1" level="project" />
-    <orderEntry type="library" name="Maven: org.dishevelled:dsh-vocabulary:1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.bdgenomics.adam:adam-format:0.12.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.avro:avro:1.7.7" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-core-asl:1.9.11" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.9.11" level="project" />
+    <orderEntry type="library" name="Maven: com.thoughtworks.paranamer:paranamer:2.3" level="project" />
+    <orderEntry type="library" name="Maven: org.xerial.snappy:snappy-java:1.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-compress:1.4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.tukaani:xz:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.7" level="project" />
+    <orderEntry type="library" name="Maven: org.dishevelled:dsh-vocabulary:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:parquet-avro:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:parquet-column:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:parquet-common:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:parquet-encoding:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:parquet-generator:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.7" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:parquet-hadoop:1.6.0rc1" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:parquet-format:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:parquet-jackson:1.6.0rc1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-client:1.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-core:1.1.0" level="project" />
+    <orderEntry type="library" name="Maven: xmlenc:xmlenc:0.52" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-math:2.1" level="project" />
+    <orderEntry type="library" name="Maven: commons-configuration:commons-configuration:1.6" level="project" />
+    <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2.1" level="project" />
+    <orderEntry type="library" name="Maven: commons-digester:commons-digester:1.8" level="project" />
+    <orderEntry type="library" name="Maven: commons-beanutils:commons-beanutils:1.7.0" level="project" />
+    <orderEntry type="library" name="Maven: commons-beanutils:commons-beanutils-core:1.8.0" level="project" />
+    <orderEntry type="library" name="Maven: commons-net:commons-net:1.4.1" level="project" />
+    <orderEntry type="library" name="Maven: oro:oro:2.0.8" level="project" />
+    <orderEntry type="library" name="Maven: commons-el:commons-el:1.0" level="project" />
+    <orderEntry type="library" name="Maven: hsqldb:hsqldb:1.8.0.10" level="project" />
+    <orderEntry type="library" name="Maven: org.bdgenomics.bdg-formats:bdg-formats:0.2.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.slf4j:slf4j-simple:1.7.7" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.osgi:org.osgi.core:4.2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.cytoscape:service-api:test-jar:tests:3.1.0" level="project" />

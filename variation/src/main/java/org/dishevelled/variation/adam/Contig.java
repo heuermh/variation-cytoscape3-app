@@ -24,19 +24,19 @@ package org.dishevelled.variation.adam;
 
 */
 
-public class AdamContig
+public class Contig
 {
     private String name;
     private long  contigLength;
     private String reference;
     private String species;
 
-    public AdamContig()
+    public Contig()
     {
 
     }
 
-    public AdamContig(String name, long contigLength, String reference, String species)
+    public Contig(String name, long contigLength, String reference, String species)
     {
         this.name = name;
         this.contigLength = contigLength;

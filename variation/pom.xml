@@ -53,6 +53,16 @@
       <artifactId>dsh-vocabulary</artifactId>
       <scope>compile</scope>
     </dependency>
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>1.7.7</version>
+      </dependency>
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-simple</artifactId>
+          <version>1.7.7</version>
+      </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -77,7 +87,18 @@
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
       <scope>compile</scope>
+      <version>1.7.7</version>
     </dependency>
+      <dependency>
+          <groupId>org.bdgenomics.bdg-formats</groupId>
+          <artifactId>bdg-formats</artifactId>
+          <version>0.2.0</version>
+      </dependency>
+      <dependency>
+          <groupId>org.bdgenomics.bdg-formats</groupId>
+          <artifactId>bdg-formats</artifactId>
+          <version>0.2.0</version>
+      </dependency>
   </dependencies>
   <reporting>
     <plugins>
