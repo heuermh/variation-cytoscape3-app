@@ -148,7 +148,7 @@ public final class AdamVariationServiceTest
         contig.setSpecies(species);
 
         variant.setContig(contig);
-        /* in avro/parquet file "position": 16162218, "exclusiveEnd": 16162219, */
+        /* in avro/parquet file "start": 16162218, "end": 16162219, */
         variant.setStart(16162218L);
         variant.setEnd(16162219L);
         variant.setReferenceAllele("C");
@@ -174,15 +174,14 @@ public final class AdamVariationServiceTest
         copyResources("ALL.chr22.phase1_release_v3.20101123.snps_indels_svs.genotypes-2-indv-thin-20000bp-trim.adam");
 
         Feature feature = new Feature(species, reference, "ENSG00000206195", "22", 16147979, 16193004, -1);
-        boolean found = false;
+        int count = 0;
         for (Variation variation : variationService.variations(feature))
         {
-            System.out.println("variation " + variation);
             if (variation.getRegion().equals("22") && variation.getStart() == 16162219)
-            // ADAMVariant doesn't include dbSnp ids
+            // todo: ADAM variant doesn't include dbSnp ids
             //if (variation.getIdentifiers().contains("rs139448371"))
             {
-                // vcf2Adam doesn't populate species and assembly on ADAMContig
+                // todo: vcf2Adam doesn't populate species and assembly on ADAMContig
                 //assertEquals(species, variation.getSpecies());
                 //assertEquals(reference, variation.getReference());
                 assertEquals("C", variation.getReferenceAllele());
@@ -193,10 +192,10 @@ public final class AdamVariationServiceTest
                 assertEquals(16162219, variation.getStart());
                 assertEquals(16162219, variation.getEnd());
 
-                found = true;
+                count++;
             }
         }
-        assertTrue(found);
+        assertEquals(1, count);;
     }
 
 
