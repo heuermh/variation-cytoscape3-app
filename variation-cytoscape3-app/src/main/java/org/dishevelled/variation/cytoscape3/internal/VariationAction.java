@@ -181,7 +181,7 @@ final class VariationAction extends AbstractCyAction
         contentPane.add("Center", app);
         dialog.setContentPane(contentPane);
 
-        dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         installCloseKeyBinding(dialog);
         dialog.setBounds(200, 200, 1016, 628);
         dialog.setVisible(true);
